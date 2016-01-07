@@ -4,8 +4,8 @@ Plugin to control ethernet connected devices by tcp commands on boards from - <h
 
 There are different boards with a combination of the following onboard devices:
    * Relays (16A @ 24VDC / 230VAC)
-   * Digital switching I/Os (8, NPN OC transistor with 10k)
-   * Analog inputs (4,8, 0-3,3V or 0-5V)
+   * Digital switching I/Os (NPN OC transistor with 10k)
+   * Analog inputs (0-3,3V or 0-5V with 10 bits resolution)
 
 This plugin is only for controlling and not for configuring the devices.
 
@@ -27,14 +27,14 @@ You can load the plugin by editing your `config.json` to include the following i
 `pingInterval` specifies the time interval in seconds for updating the data set. For debugging purposes you may set 
 property `debug` to true. This will write additional debug messages to the pimatic log. The values set in the example config afterwards represent also the default values. 
 
-  {
-    "plugin": "ethboard",
-    "host": "192.168.0.200",
-    "port": 17498,
-    "pingInterval": 60,
-    "password": ""
-    "debug": false
-  },
+    {
+          "plugin": "ethboard",
+          "host": "192.168.0.200",
+          "port": 17498,
+          "pingInterval": 60,
+          "password": ""
+          "debug": false
+    },
 
 Then you need to add a device in the `devices` section. Currently, only the following device type is supported:
 
@@ -42,14 +42,14 @@ Then you need to add a device in the `devices` section. Currently, only the foll
 
 As part of the device definition you need to provide the `deviceid`, which is the relay number on the board. You can also specify a `pulseTime`, where each increment counts as 100ms. If `pulseTime` expires the relay state will toggle back, while `pulseType` is on of ["none", "on", "off", "both"], what configures the states for which the pulseTimer will be activated.
 
-  {
-    "id": "ethrelay01",
-    "class": "EthRelay",
-    "name": "Ethernet Relay 01",
-    "deviceid": 1,
-    "pulseType": "none",
-    "pulseTime": 0
-  },
+    {
+          "id": "ethrelay01",
+          "class": "EthRelay",
+          "name": "Ethernet Relay 01",
+          "deviceid": 1,
+          "pulseType": "none",
+          "pulseTime": 0
+    },
 
 ## Contributions
 
