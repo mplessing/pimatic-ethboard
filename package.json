@@ -1,0 +1,46 @@
+{ 
+  "name": "pimatic-plugin-ethboard",
+  "description": "Control ethernet connected devices by tcp",
+  "author": "Markus Plessing <mplessing@gmail.com>",
+  "contributors": [
+    {
+      "name": "Markus Plessing",
+      "url": "https://github.com/mplessing"
+    }
+  ],
+  "main": "ethboard",
+  "files": [
+    "ethboard.coffee",
+    "ethboard-config-schema.coffee",
+    "device-config-schema.coffee",
+    "README.md",
+    "LICENSE"
+  ],
+  "version": "0.0.1",
+  "homepage": "https://github.com/mplessing/pimatic-ethboard",
+  "keywords": [
+    "pimatic",
+    "Ethernet",
+    "WiFi",
+    "Relay",
+    "SmartHome"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/mplessing/pimatic-ethboard.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mplessing/pimatic-ethboard/issues"
+  },
+  "license": "GPL-2.0",
+  "configSchema": "ethboard-config-schema.coffee",
+  "dependencies": {
+  },
+  "peerDependencies": {
+    "pimatic": "0.8.*"
+  },
+  "engines": {
+    "node": ">0.8.x",
+    "npm": ">1.1.x"
+  }
+}
