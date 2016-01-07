@@ -1,4 +1,4 @@
-{ 
+{
   "name": "pimatic-plugin-ethboard",
   "description": "Control ethernet connected devices by tcp",
   "author": "Markus Plessing <mplessing@gmail.com>",
@@ -16,7 +16,7 @@
     "README.md",
     "LICENSE"
   ],
-  "version": "0.0.1",
+  "version": "0.0.2",
   "homepage": "https://github.com/mplessing/pimatic-ethboard",
   "keywords": [
     "pimatic",
@@ -34,8 +34,7 @@
   },
   "license": "GPL-2.0",
   "configSchema": "ethboard-config-schema.coffee",
-  "dependencies": {
-  },
+  "dependencies": {},
   "peerDependencies": {
     "pimatic": "0.8.*"
   },
