@@ -40,7 +40,7 @@ Then you need to add a device in the `devices` section. Currently, only the foll
 
 * EthRelay: This type is able to switch a relay and display its current state.
 
-As part of the device definition you need to provide the `deviceid`, which is the relay number on the board. You can also specify a `pulseTime`, where each increment counts as 100ms. If `pulseTime` expires the relay state will toggle back, while `pulseType` is on of ["none", "on", "off", "both"], what configures the states for which the pulseTimer will be activated.
+As part of the device definition you need to provide the `deviceid`, which is the relay number on the board. You can also specify a `pulseTime`, where each increment counts as 100ms. If `pulseTime` expires the relay state will toggle back, while `pulseType` is one of ["none", "on", "off", "both"], what configures the states for which the pulseTimer will be activated.
 
     {
           "id": "ethrelay01",
@@ -59,3 +59,7 @@ Contributions to the project are welcome. You can simply fork the project and cr
 
 * 20160106, V0.0.1
     * Initial Version
+* 20160107, V0.0.2
+    * Updated typos in readme
+* 20160107, V0.0.3
+    * Synch version of git and npm
