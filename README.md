@@ -1,6 +1,7 @@
-#pimatic-plugin-ethboard
+#pimatic-ethboard
 
-Plugin to control ethernet connected devices by tcp commands on boards from - <http://www.robot-electronics.co.uk>.
+Plugin to control ethernet/wifi devices by tcp/ip commands.
+Protocol is as defined for boards from - <http://www.robot-electronics.co.uk>.
 
 There are different boards with a combination of the following onboard devices:
    * Relays (16A @ 24VDC / 230VAC)
@@ -13,11 +14,27 @@ Note, this is an early version of the plugin provided for testing purposes. Plea
 [github](https://github.com/mplessing/pimatic-ethboard/issues).
 
 ## Supported devices
-The ethernet/wifi devices from robot-electronics have three numbers at the end of the device name giving the amount of the different supported devices by the board. The left number is the amount of analog inputs, the middle number represents the number of digital switching I/Os and the right number gives the number of relays.
+Basically every device which respects the protocol used for communicating is supported.
+Base of development are the ethernet/wifi devices from robot-electronics.
+
+robot-electronic ethernet/wifi devices have three numbers at the end of the device name giving the amount of the different supported devices by the board. The left number is the amount of analog inputs, the middle number represents the number of digital switching I/Os and the right number gives the number of relays.
 
 There are the following standard devices available:
 ETH002, ETH008, ETH484, ETH8020
 WIFI002, WIFI008, WIFI484, WIFI0820
+
+## Protocol description
+
+| Action               | Command               | Response                    | 
+|------------- --------|-----------------------|-----------------------------|
+| Get hardware id      | 0x10                  | 3 byte HW ident             |
+| Set device active    | 0x20 devId pulseTime  | 1 byte, 0=success 1=failure |
+| Set device inactive  | 0x21 devId pulseTime  | 1 byte, 0=success 1=failure |
+| Get device states    | 0x24                  | 1 bit per device, min 1 byte per type [Relays,DigitalIOs] |
+| Get analog value     | 0x32 devId            | 2 bytes integer value (high byte first) |
+| Send auth string     | 0x79 pwdBytes         | 1 byte, 1=auth ok 2=failure |
+| Get auth state       | 0x7A                  | 1 byte, 0=locked, 1-XX=auth timer 0xFF=disabled |
+| Set auth locked      | 0x7B                  | no response                 |
 
 ## Restrictions
 Currently only the the relay feature of an ETH002 is implemented and tested. The relay feature of the other boards should work out of the box.
@@ -63,3 +80,7 @@ Contributions to the project are welcome. You can simply fork the project and cr
     * Updated typos in readme
 * 20160107, V0.0.3
     * Synch version of git and npm
+* 20160112, V0.0.4
+    * Added protocol info to README
+    * fixed some typos in README and package.json
+    * updated the test server

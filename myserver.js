@@ -1,19 +1,80 @@
 var net = require('net');
 
 var PORT = 17498;
-
+var inout = 0x0000;
+var auth = 0;
+var cmd = 0;
 var server = net.createServer(function(socket) {
   console.log('server connected');
   console.log('remote - ' + socket.remoteAddress + ':' + socket.remotePort);
   console.log('local - ' + socket.localAddress + ':' + socket.localPort);
   
   socket.setEncoding('utf8');
-  socket.write('connected with the socket server');
 
   // socket.setTimeout(15000);
   socket.on('data', function(data) {
     console.log('server receive data');
-    console.log('data: ', data);
+    console.log('data: ' + data.charCodeAt(0));
+
+    if(data.charCodeAt(0) == 0x10)
+    {
+      socket.write(String.fromCharCode(18)+String.fromCharCode(1)+String.fromCharCode(1));
+    }
+    else if(data.charCodeAt(0) == 0x20)
+    {
+      socket.write(""+0);
+      inout |= data.charCodeAt(1);
+      console.log("on: " + data.charCodeAt(1) + " : " + inout);
+    }
+    else if(data.charCodeAt(0) == 0x21)
+    {
+      socket.write(""+0); 
+      inout &= ~(data.charCodeAt(1));
+      console.log("off: " + ~(data.charCodeAt(1)) + " : " + inout);
+    }
+    else if(data.charCodeAt(0) == 0x24)
+    {
+      socket.write(""+inout);
+      console.log("getout: " + inout);
+    }
+    else if(data.charCodeAt(0) == 0x25)
+    {
+      socket.write(String.fromCharCode(0x00)+String.fromCharCode(0x30));
+      console.log("getin");
+    }
+    else if(data.charCodeAt(0) == 0x32)
+    {
+      socket.write(String.fromCharCode(0x12)+String.fromCharCode(0x34));
+      console.log("analog");
+    }
+    else if(data.charCodeAt(0) == 0x78)
+    {
+      socket.write(String.fromCharCode(124));
+      console.log("volt");
+    }
+    else if(data.charCodeAt(0) == 0x79)
+    {
+      socket.write(String.fromCharCode(1));
+      console.log("passwd: " + data)
+      auth = 1;
+    }
+    else if(data.charCodeAt(0) == 0x7A)
+    {
+      if(auth == 1)
+        socket.write(String.fromCharCode(30));
+      else
+        socket.write(String.fromCharCode(0));
+      console.log("auth time");
+    }
+    else if(data.charCodeAt(0) == 0x7B)
+    {
+      auth = 0;
+      console.log("logout");
+    }
+    else 
+    {
+      console.log("nothing");
+    }
   });
   
   socket.on('end', function() {

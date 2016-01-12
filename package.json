@@ -1,6 +1,6 @@
 {
-  "name": "pimatic-plugin-ethboard",
-  "description": "Control ethernet connected devices by tcp",
+  "name": "pimatic-ethboard",
+  "description": "Control ethernet/wifi devices by tcp/ip commands",
   "author": "Markus Plessing <mplessing@gmail.com>",
   "contributors": [
     {
