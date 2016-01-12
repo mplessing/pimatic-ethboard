@@ -26,7 +26,7 @@ WIFI002, WIFI008, WIFI484, WIFI0820
 ## Protocol description
 
 | Action               | Command               | Response                    | 
-|------------- --------|-----------------------|-----------------------------|
+| -------------------- | --------------------- | --------------------------- |
 | Get hardware id      | 0x10                  | 3 byte HW ident             |
 | Set device active    | 0x20 devId pulseTime  | 1 byte, 0=success 1=failure |
 | Set device inactive  | 0x21 devId pulseTime  | 1 byte, 0=success 1=failure |
@@ -84,3 +84,5 @@ Contributions to the project are welcome. You can simply fork the project and cr
     * Added protocol info to README
     * fixed some typos in README and package.json
     * updated the test server
+* 20160112, V0.0.5
+    * Fixed protocol table
