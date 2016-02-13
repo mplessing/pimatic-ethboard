@@ -96,5 +96,4 @@ Contributions to the project are welcome. You can simply fork the project and cr
 * 20160213, V0.0.7
     * Improved command handling with FIFO
     * Added board type detection
-* 20160213, V0.0.8
     * Added analog sensor device
