@@ -18,17 +18,17 @@ var server = net.createServer(function(socket) {
 
     if(data.charCodeAt(0) == 0x10)
     {
-      socket.write(String.fromCharCode(18)+String.fromCharCode(1)+String.fromCharCode(1));
+      socket.write(String.fromCharCode(20)+String.fromCharCode(1)+String.fromCharCode(1));
     }
     else if(data.charCodeAt(0) == 0x20)
     {
-      socket.write(""+0);
+      socket.write(String.fromCharCode(0));
       inout |= data.charCodeAt(1);
       console.log("on: " + data.charCodeAt(1) + " : " + inout);
     }
     else if(data.charCodeAt(0) == 0x21)
     {
-      socket.write(""+0); 
+      socket.write(String.fromCharCode(0)); 
       inout &= ~(data.charCodeAt(1));
       console.log("off: " + ~(data.charCodeAt(1)) + " : " + inout);
     }
@@ -44,7 +44,7 @@ var server = net.createServer(function(socket) {
     }
     else if(data.charCodeAt(0) == 0x32)
     {
-      socket.write(String.fromCharCode(0x12)+String.fromCharCode(0x34));
+      socket.write(String.fromCharCode(0x01)+String.fromCharCode(0x23));
       console.log("analog");
     }
     else if(data.charCodeAt(0) == 0x78)

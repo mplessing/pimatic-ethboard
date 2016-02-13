@@ -37,7 +37,7 @@ WIFI002, WIFI008, WIFI484, WIFI0820
 | Set auth locked      | 0x7B                  | no response                 |
 
 ## Restrictions
-Currently only the the relay feature of an ETH002 is implemented and tested. The relay feature of the other boards should work out of the box.
+Currently only the relay feature of an ETH002 is implemented and tested. The relay feature of the other boards should work out of the box. Additionally I've implemented the analog value feature with respect to the specifications. 
 
 ## Configuration
 You can load the plugin by editing your `config.json` to include the following in the `plugins` section. The properties `host` and `port` are used to connect to the board. If you set a TCP password in the board configuration also set this password here. The property 
@@ -67,6 +67,12 @@ As part of the device definition you need to provide the `deviceid`, which is th
           "pulseType": "none",
           "pulseTime": 0
     },
+    {
+          "id": "ethanalog01",
+          "class": "EthAnalogSensor",
+          "name": "Ethernet Analog Sensor 01"
+          "deviceid": 1
+    }
 
 ## Contributions
 
@@ -83,6 +89,12 @@ Contributions to the project are welcome. You can simply fork the project and cr
 * 20160112, V0.0.4
     * Added protocol info to README
     * fixed some typos in README and package.json
-    * updated the test server
 * 20160112, V0.0.5
     * Fixed protocol table
+* 20160213, V0.0.6
+    * Improved the JS test server
+* 20160213, V0.0.7
+    * Improved command handling with FIFO
+    * Added board type detection
+* 20160213, V0.0.8
+    * Added analog sensor device

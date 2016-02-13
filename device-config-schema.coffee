@@ -24,5 +24,21 @@ module.exports = {
         description: "Time for a relay pulse (1 = 100ms)"
         type: "number"
         default: 0
+  },
+  EthAnalogSensor: {
+    title: "EthAnalogSensor config options"
+    type: "object"
+    extensions: ["xLink", "xAttributeOptions"]
+    properties:
+      id:
+        description: "The id of the device"
+        type: "string"
+      name:
+        description: "The name of the device"
+        type: "string"
+      deviceid:
+        description: "The deviceid of the device"
+        type: "number"
+        default: 0
   }
 }

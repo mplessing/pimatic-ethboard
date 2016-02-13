@@ -47,15 +47,18 @@ module.exports = (env) ->
       @password = config.password
       @debug = config.debug
       @isConnected = false
-      @lastCmd = "none"
+      @cmdObj = null
       @client = null
+      @pluginIdle = true
+      @deviceType = null
+      @cmdFifo = []
 
       @ethBoardObjects = []
 
       @ethBoardClasses = [
         EthRelay,
-#        EthDigitialInOut,
-#        EthAnalogSensor
+#        EthDigitalInOut,
+        EthAnalogSensor
       ]
       
       @createConnection()
@@ -82,8 +85,21 @@ module.exports = (env) ->
       @client.on('error', @errorCallback.bind(this))
       @client.on('end', @endCallback.bind(this))
 
-    sendCommand: (id, cmd) ->
-      @lastCmd = cmd
+    pushCommand: (id, cmd) ->
+      @cmdFifo.push({cmd: cmd, id: id})
+      if @cmdFifo.length is 1
+        @sendNextCommand()
+
+    sendNextCommand: ->
+      if @pluginIdle is false or @cmdFifo.length is 0
+        return
+
+      @pluginIdle = false
+
+      @cmdObj = @cmdFifo.shift()
+      cmd = @cmdObj.cmd
+      id = @cmdObj.id
+
       # commands "on" and "off" deliver also the pulseTime, so split it
       if cmd.indexOf("on", 0) >= 0 or cmd.indexOf("off", 0) >= 0
         elems = cmd.split " "
@@ -94,6 +110,8 @@ module.exports = (env) ->
       switch cmd
         when "auth"
           @client.write(String.fromCharCode(121)+@password)
+        when "analog"
+          @client.write(String.fromCharCode(50)+String.fromCharCode(id))
         when "info"
           @client.write(String.fromCharCode(16))
         when "volt"
@@ -111,31 +129,32 @@ module.exports = (env) ->
         clearInterval(@intervalObject)
 
       @intervalObject = setInterval(=>
-        @_requestRelayState()
+        @_doDevicePolling()
       , @interval
       )
 
     # send command to request the relay state or recover connection
-    _requestRelayState: ->
+    _doDevicePolling: ->
       # check the connection also cyclic to react on module disconnect
       if @isConnected is false
         env.logger.error "Lost connection to "+@host+", trying to reconnect."
         @client.destroy()
         @createConnection()
-      else 
-        @sendCommand(0xFF, "check")
+      else
+        for Cl in @ethBoardObjects
+          Cl.pollDevice()
 
     # send command for authorisation
     _doAuthorisation: ->
-      @sendCommand(0xFF, "auth")
+      @pushCommand(0xFF, "auth")
 
     # send command to request module info
     _requestModuleInfo: ->
-      @sendCommand(0xFF, "info")
+      @pushCommand(0xFF, "info")
     
     # send command to request voltage info
     _requestVoltageInfo: ->
-      @sendCommand(0xFF, "volt")
+      @pushCommand(0xFF, "volt")
     
     # connection end callback
     endCallback: ->
@@ -166,29 +185,37 @@ module.exports = (env) ->
       if(@password.length > 0)
         env.logger.info("Auth")
         @_doAuthorisation()
-      else
-        @_requestModuleInfo()
+
+      @_requestModuleInfo()
+      @_requestVoltageInfo()
 
       for Cl in @ethBoardObjects
         Cl.eventHandler "connection"
     
     # data callback
     dataCallback: (data) ->
-      env.logger.debug("Data ["+@lastCmd+"] -> ") if @debug
+      env.logger.debug("Data ["+@cmdObj.id+":"+@cmdObj.cmd+"] -> ") if @debug
       if @debug
         for i in [0...data.length] by 1
           env.logger.debug("["+i+"]:"+data[i])
       
+      if(@cmdObj.cmd is "info")
+        switch data[0]
+          when 18 then @deviceType = {a: 0, d: 0, r: 2, m: 1.0}
+          when 19 then @deviceType = {a: 0, d: 0, r: 8, m: 1.0}
+          when 20 then @deviceType = {a: 4, d: 8, r: 4, m: (3.3/1023.0)}
+          when 21 then @deviceType = {a: 8, d: 0, r: 20, m: (5.0/1023.0)}
+          when 22 then @deviceType = {a: 4, d: 8, r: 4, m: (3.3/1023.0)}
+          when 24 then @deviceType = {a: 8, d: 0, r: 20, m: (5.0/1023.0)}
+          when 26 then @deviceType = {a: 0, d: 0, r: 2, m: 1.0}
+          when 28 then @deviceType = {a: 0, d: 0, r: 8, m: 1.0}
+
       for Cl in @ethBoardObjects
-        Cl.dataHandler(@lastCmd, data)
-      # if moduleAuth is handled, request moduleInfo
-      if data.length == 1 and @lastCmd == "auth"
-        if(data[0] == 1) then env.logger.debug("Auth successful") if @debug
-        else if(data[0] == 2) then env.logger.debug("Auth failed") if @debug
-        @_requestModuleInfo()  
-      # if moduleInfo is handled, request voltageInfo
-      else if(data.length == 3 and @lastCmd == "info")
-        @_requestVoltageInfo()
+        Cl.dataHandler(@cmdObj.id, @cmdObj.cmd, data)
+      
+      @pluginIdle = true
+      @sendNextCommand()
+
 
   class EthRelay extends env.devices.PowerSwitch
 
@@ -227,6 +254,9 @@ module.exports = (env) ->
 
       super()
 
+    pollDevice: ->
+      ethBoard.pushCommand(@did, "check")
+
     # getter for the voltage attribute
     getRelayVoltage: ->
       return Promise.resolve @relayVoltage
@@ -248,15 +278,18 @@ module.exports = (env) ->
         @emit attributeName, value
 
     # receive data callback
-    dataHandler: (cmd, data) ->
+    dataHandler: (id, cmd, data) ->
+      if id is not 0xFF and id is not @did
+        return
+
       # moduleInfo response
-      if data.length == 3 and cmd == "info"
-        info = "Type: " + data[0] + " HW: " + data[1] + " SW: " + data[2]
+      if cmd == "info"
+        info = "v" + data[0] + ":" + data[1] + ":" + data[2]
         @_setAttribute "moduleInfo", info
         @moduleInfo = info
         env.logger.debug("info: "+ @moduleInfo)
       # voltageInfo response (divide by 10)
-      else if data.length == 1 and cmd == "volt"
+      else if cmd == "volt"
         volt = data[0] / 10
         @_setAttribute "relayVoltage", volt
         env.logger.debug("volt: " + volt) if @debug
@@ -290,9 +323,9 @@ module.exports = (env) ->
           offPulse = @pulseTime
 
         if state is true
-          ethBoard.sendCommand(@did, "on "+onPulse)
+          ethBoard.pushCommand(@did, "on "+onPulse)
         else if state is false
-          ethBoard.sendCommand(@did, "off "+offPulse)
+          ethBoard.pushCommand(@did, "off "+offPulse)
         else
           env.logger.debug("State is " + state) if @debug
       )
@@ -302,12 +335,79 @@ module.exports = (env) ->
 #      @name = config.name
 #      @id = config.id
 #      @did = config.deviceid
-#
-#  class EthAnalogSensor extends env.devices.Sensor
-#    constructor: (@config, @plugin, lastState) ->
-#      @name = config.name
-#      @id = config.id
-#      @did = config.deviceid
+
+  class EthAnalogSensor extends env.devices.Sensor
+
+    attributes:
+      moduleInfo:
+        description: "The info of the module"
+        type: "string"
+      value:
+        description: "The voltage at the analog input"
+        type: "number"
+        unit: "V"     
+    constructor: (@config, @plugin, lastState) ->
+      @name = config.name
+      @id = config.id
+      @did = config.deviceid
+      @voltage = 0
+      @moduleInfo = "not set"
+      @multiplier = 1.0
+
+      if @did is 0
+        env.logger.error "DeviceId can not be zero"
+
+      super()
+    
+    eventHandler: (typeName) ->
+      switch typeName
+        when "connection" then env.logger.debug("EthAnalogSensor: Connect") if @debug
+        when "error" then env.logger.debug("EthAnalogSensor: Error") if @debug
+        when "end" then env.logger.debug("EthAnalogSensor: End") if @debug
+        when "close" then env.logger.debug("EthAnalogSensor: Close") if @debug
+
+   # helper function to set the value of an attribute
+    _setAttribute: (attributeName, value) ->
+      if @[attributeName] isnt value
+        @[attributeName] = value
+        @emit attributeName, value
+    
+    # getter for the moduleInfo attribute
+    getModuleInfo: ->
+      return Promise.resolve @moduleInfo
+
+    pollDevice: ->
+      if(ethBoard.deviceType.a > 0)
+        ethBoard.pushCommand(@did, "analog")
+
+    getValue: -> 
+      return Promise.resolve @voltage
+
+    # receive data callback
+    dataHandler: (id, cmd, data) ->
+      if id is not 0xFF and id is not @did
+        return
+
+      # moduleInfo response
+      if cmd == "info"
+        if(ethBoard.deviceType.a is 0)
+          info = "Device not supported by module"
+        else
+          info = "v" + data[0] + ":"+ data[1] + ":" + data[2]
+          # load the multiplier from the deviceType struct
+          @multiplier = ethBoard.deviceType.m
+
+        @_setAttribute "moduleInfo", info
+        @moduleInfo = info
+        env.logger.debug("info: "+ @moduleInfo)
+      # all other receptions are analog responses
+      else if data.length > 0
+        # last command was check state
+        if(cmd == "analog")
+          @voltage = data[0] << 8 | data[1]
+          @voltage = @voltage * @multiplier
+          @_setAttribute "value", @voltage
+          env.logger.debug("analog: "+ @voltage)
 
   # ###Finally
   # Create a instance of my plugin
