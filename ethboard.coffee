@@ -41,11 +41,11 @@ module.exports = (env) ->
     # 
     init: (app, @framework, @config) =>
 
-      @host = config.host
-      @port = config.port
-      @interval = 1000 * config.pingInterval
-      @password = config.password
-      @debug = config.debug
+      @host = @config.host
+      @port = @config.port
+      @interval = 1000 * @config.pingInterval
+      @password = @config.password
+      @debug = @config.debug
       @isConnected = false
       @cmdObj = null
       @client = null
@@ -74,7 +74,7 @@ module.exports = (env) ->
               return device
           })
 
-      env.logger.debug("ethBoard init") if config.debug
+      env.logger.debug("ethBoard init") if @config.debug
 
     # used to setup the connection, also for connection recovery
     createConnection: ->
@@ -235,16 +235,16 @@ module.exports = (env) ->
     constructor: (@config, @plugin, lastState) ->
 
       # read the config values
-      @name = config.name
-      @id = config.id
-      @did = config.deviceid
+      @name = @config.name
+      @id = @config.id
+      @did = @config.deviceid
 
       if @did is 0
         env.logger.error "DeviceId can not be zero"
       
-      @pulseTime = config.pulseTime
-      @pulseType = config.pulseType
-      @debug = plugin.config.debug
+      @pulseTime = @config.pulseTime
+      @pulseType = @config.pulseType
+      @debug = @plugin.config.debug
 
       @moduleInfo = "not set"
       @relayVoltage = 0.0
@@ -332,9 +332,9 @@ module.exports = (env) ->
 
 #  class  EthDigitalInOut extends env.devices.PowerSwitch
 #    constructor: (@config, @plugin, lastState) ->
-#      @name = config.name
-#      @id = config.id
-#      @did = config.deviceid
+#      @name = @config.name
+#      @id = @config.id
+#      @did = @config.deviceid
 
   class EthAnalogSensor extends env.devices.Sensor
 
@@ -347,9 +347,9 @@ module.exports = (env) ->
         type: "number"
         unit: "V"     
     constructor: (@config, @plugin, lastState) ->
-      @name = config.name
-      @id = config.id
-      @did = config.deviceid
+      @name = @config.name
+      @id = @config.id
+      @did = @config.deviceid
       @voltage = 0
       @moduleInfo = "not set"
       @multiplier = 1.0
