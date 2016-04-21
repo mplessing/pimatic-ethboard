@@ -53,11 +53,12 @@ property `debug` to true. This will write additional debug messages to the pimat
           "debug": false
     },
 
-Then you need to add a device in the `devices` section. Currently, only the following device type is supported:
+Then you need to add a device in the `devices` section. Currently, only the following device types are supported:
 
 * EthRelay: This type is able to switch a relay and display its current state.
+* EthAnalogSensor: This type is able to provide analog values with a resolution of 10bit
 
-As part of the device definition you need to provide the `deviceid`, which is the relay number on the board. You can also specify a `pulseTime`, where each increment counts as 100ms. If `pulseTime` expires the relay state will toggle back, while `pulseType` is one of ["none", "on", "off", "both"], what configures the states for which the pulseTimer will be activated.
+As part of the device definition you need to provide the `deviceid`, which is the device number on the board. For relays you can also specify a `pulseTime`, where each increment counts as 100ms. If `pulseTime` expires the relay state will toggle back, while `pulseType` is one of ["none", "on", "off", "both"], what configures the states for which the pulseTimer will be activated.
 
     {
           "id": "ethrelay01",
@@ -70,7 +71,7 @@ As part of the device definition you need to provide the `deviceid`, which is th
     {
           "id": "ethanalog01",
           "class": "EthAnalogSensor",
-          "name": "Ethernet Analog Sensor 01"
+          "name": "Ethernet Analog Sensor 01",
           "deviceid": 1
     }
 
