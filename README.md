@@ -98,3 +98,6 @@ Contributions to the project are welcome. You can simply fork the project and cr
     * Improved command handling with FIFO
     * Added board type detection
     * Added analog sensor device
+* 20160416, V0.0.8
+    * Fixed typo in README.md
+    * Plugin supported by pimatic 0.9 (thanks @mwittig)
