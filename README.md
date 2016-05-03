@@ -101,3 +101,5 @@ Contributions to the project are welcome. You can simply fork the project and cr
 * 20160416, V0.0.8
     * Fixed typo in README.md
     * Plugin supported by pimatic 0.9 (thanks @mwittig)
+* 20160502, V0.0.9
+    * Added device destroy method for pimatic 0.9 support

@@ -75,6 +75,13 @@ module.exports = (env) ->
           })
 
       env.logger.debug("ethBoard init") if @config.debug
+    
+    removeEthBoardDevice: ( ethBoardDevice ) ->
+      for device, index in @ethBoardObjects
+        if ethBoardDevice.id is device.id 
+          @ethBoardObjects.splice index, 1
+          env.logger.debug "Removed #{device.id}, devices left: #{@ethBoardObjects.length}" if @debug
+          break
 
     # used to setup the connection, also for connection recovery
     createConnection: ->
@@ -254,6 +261,10 @@ module.exports = (env) ->
 
       super()
 
+    destroy: () ->
+      ethBoard.removeEthBoardDevice @
+      super()
+
     pollDevice: ->
       ethBoard.pushCommand(@did, "check")
 
@@ -359,6 +370,10 @@ module.exports = (env) ->
 
       super()
     
+    destroy: () -> 
+      ethBoard.removeEthBoardDevice @
+      super()
+
     eventHandler: (typeName) ->
       switch typeName
         when "connection" then env.logger.debug("EthAnalogSensor: Connect") if @debug
